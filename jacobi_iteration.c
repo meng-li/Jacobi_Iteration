@@ -61,7 +61,6 @@ void init_data(int my_rank, double ***matrix_a, double **input_a, double **input
 {
     int irow, icol, idx;
     FILE *fp;
-    double **matrix_a_tmp, *input_a_tmp, *input_b_tmp;
     if(my_rank == ROOT) {
         // read matrix A
         if((fp=fopen("./matrix-data-jacobi.inp", "r")) == NULL) {
@@ -69,15 +68,14 @@ void init_data(int my_rank, double ***matrix_a, double **input_a, double **input
             exit(-1);
         }
         fscanf(fp, "%d %d", no_rows, no_cols);
-        matrix_a_tmp = (double **)malloc((*no_rows) * sizeof(double *));
+        *matrix_a = (double **)malloc((*no_rows) * sizeof(double *));
         for(irow=0; irow<*no_rows; irow++) {
-            matrix_a_tmp[irow] = (double *)malloc((*no_cols) * sizeof(double));
+            (*matrix_a)[irow] = (double *)malloc((*no_cols) * sizeof(double));
             for(icol=0; icol<*no_cols; icol++) {
-                fscanf(fp, "%lf", &matrix_a_tmp[irow][icol]);
+                fscanf(fp, "%lf", &(*matrix_a)[irow][icol]);
             }
         }
         fclose(fp);
-        *matrix_a = matrix_a_tmp;
         
         // read vector B
         if((fp=fopen("./vector-data-jacobi.inp", "r")) == NULL) {
@@ -85,22 +83,20 @@ void init_data(int my_rank, double ***matrix_a, double **input_a, double **input
             exit(-1);
         }
         fscanf(fp, "%d", no_rows);
-        input_b_tmp = (double *)malloc((*no_rows) * sizeof(double));
+        *input_b = (double *)malloc((*no_rows) * sizeof(double));
         for(irow=0; irow<*no_rows; irow++) {
-            fscanf(fp, "%lf", &input_b_tmp[irow]);
+            fscanf(fp, "%lf", &(*input_b)[irow]);
         }
         fclose(fp);
-        *input_b = input_b_tmp;
 
         // convert matrix A into vector input A
-        input_a_tmp = (double *)malloc((*no_rows) * (*no_cols) * sizeof(double));
+        *input_a = (double *)malloc((*no_rows) * (*no_cols) * sizeof(double));
         idx = 0;
         for(irow=0; irow<*no_rows; irow++) {
             for(icol=0; icol<*no_cols; icol++) {
-                input_a_tmp[idx++] = matrix_a_tmp[irow][icol];
+                (*input_a)[idx++] = (*matrix_a)[irow][icol];
             }
         }
-        *input_a = input_a_tmp;
     }
 }
 
